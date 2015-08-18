@@ -9,10 +9,8 @@
 static int __init skiplist_init(void)
 {
 	int i;
-	//struct timespec start, end;
 	struct timeval start, end;
 	struct skiplist *list;
-	//unsigned long idle_time;
 
 	int *key = kmalloc(N * sizeof(int), GFP_KERNEL);
 	if (key == NULL) {
@@ -31,14 +29,10 @@ static int __init skiplist_init(void)
         printk("Add %d nodes...\n", N);
 
         do_gettimeofday(&start);
-	//getnstimeofday(&start);
         for (i = 0; i < N; i++) {
                 int value = key[i] = i;
                 skiplist_insert(list, key[i], value);
         }
-	//getnstimeofday(&end);
-	//idle_time = timespec_to_ns(&end) - timespec_to_ns(&start);
-	//printk("####insert####time cost:%lu\n", idle_time);
         do_gettimeofday(&end);
         printk("time span:% ldms\n", (end.tv_sec - start.tv_sec)*1000 + (end.tv_usec - start.tv_usec)/1000);
 #ifdef SKIPLIST_DEBUG
@@ -47,7 +41,6 @@ static int __init skiplist_init(void)
 
         /* Search test */
         printk("Now search each node...\n");
-	//getnstimeofday(&start);
         do_gettimeofday(&start);
         for (i = 0; i < N; i++) {
                 struct skipnode *node = skiplist_search(list, key[i]);
@@ -59,7 +52,6 @@ static int __init skiplist_init(void)
                         printk("Not found:0x%08x\n", key[i]);
                 }
         }
-        //gettimeofday(&end, NULL);
         do_gettimeofday(&end);
         printk("time span:% ldms\n", (end.tv_sec - start.tv_sec)*1000 + (end.tv_usec - start.tv_usec)/1000);
 
@@ -89,5 +81,5 @@ module_init(skiplist_init);
 module_exit(skiplist_exit);
 
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Gu Zheng <gzheng@ddn.com>");
-MODULE_DESCRIPTION("List hist test");
+MODULE_AUTHOR("Gu Zheng <cengku@gmail.com>");
+MODULE_DESCRIPTION("Skip hist test");

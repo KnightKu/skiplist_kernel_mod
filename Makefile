@@ -1,5 +1,6 @@
 obj-m += skiplist_test.o
+kern_path=/lib/modules/`uname -r`/build
 all:
-	make -C /usr/src/kernels/2.6.32-504.16.2.el6_lustre.2.5.37.ddn2.x86_64/ M=$(PWD) modules
+	make -C $(kern_path) M=$(PWD) modules
 clean:
-	make -C /usr/src/kernels/2.6.32-504.16.2.el6_lustre.2.5.37.ddn2.x86_64/ M=$(PWD) clean
+	make -C $(kern_path) M=$(PWD) clean
