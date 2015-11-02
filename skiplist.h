@@ -23,7 +23,6 @@
 #ifndef _SKIPLIST_H
 #define _SKIPLIST_H
 
-//#include <linux/list.h>
 #include <linux/init.h>
 #include <linux/kernel.h>
 #include <linux/module.h>
@@ -151,6 +150,36 @@ skiplist_search(struct skiplist *list, int key)
 }
 
 static struct skipnode *
+skiplist_search_first_eq_big(struct skiplist *list, int key)
+{
+	int i = list->level - 1;
+	struct list_head *pos = &list->head[i];
+	struct list_head *end = &list->head[i];
+	struct skipnode *perf_node = NULL;
+
+	for (; i >= 0; i--) {
+		struct skipnode *node = NULL;
+
+		pos = pos->next;
+		skiplist_for_each(pos, end) {
+			node = list_entry(pos, struct skipnode, link[i]);
+			if (node->key >= key) {
+				end = &node->link[i];
+				perf_node = node;
+				break;
+			}
+		}
+		if (node && node->key == key) {
+			return node;
+		}
+		pos = end->prev;
+		pos--;
+		end--;
+	}
+	return perf_node;
+}
+
+static struct skipnode *
 skiplist_insert(struct skiplist *list, int key, int value)
 {
 	int level = select_level();
@@ -217,10 +246,13 @@ skiplist_remove(struct skiplist *list, int key)
 	for (; i >= 0; i--) {
 		pos = pos->next;
 		skiplist_for_each_safe(pos, n, end) {
-			struct skipnode *node = list_entry(pos, struct skipnode, link[i]);
+			struct skipnode *node =
+				list_entry(pos, struct skipnode, link[i]);
+
 			if (node->key == key) {
-				/* Break or not? support nodes for same key */
-                                skiplist_remove_node(list, node, i + 1);
+				skiplist_remove_node(list, node, i + 1);
+			} else if (node->key > key) {
+				end = &node->link[i];
 				break;
 			}
 		}
@@ -244,7 +276,7 @@ skiplist_dump(struct skiplist *list)
 			struct skipnode *node =
 				list_entry(pos, struct skipnode, link[i]);
 
-			printk(KERN_DEBUG "level:%d key:%#08x value:%#08x\n",
+			printk(KERN_DEBUG "level:%d key:%d value:%d\n",
 			       i + 1, node->key, node->value);
 		}
 		pos = &list->head[i];
